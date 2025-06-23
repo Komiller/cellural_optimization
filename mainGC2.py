@@ -31,7 +31,7 @@ def main(nelx,nely,nelz,volfrac,rmin,rstart,maxloop,commentary,mmmove,target_vol
     ndof = 3 * (nelx + 1) * (nely + 1) * (nelz + 1)
     """setting initial design and optimization domain"""
     specific_domain=False
-    x=np.zeros(3*nelx*nely*nelz)
+    x=np.ones(3*nelx*nely*nelz)*rstart
     if specific_domain:
         xmask = np.load('examples/cyllinder/cyllinder_xmask.npy')
     else: xmask = None
@@ -62,7 +62,7 @@ def main(nelx,nely,nelz,volfrac,rmin,rstart,maxloop,commentary,mmmove,target_vol
     dispconstrval = 0.0 * np.ones(len(dispconstrdofs))
 
     """setting up problem"""
-    my_problem = Problem(nelx, nely, nelz, rmin, target_volf, x, f, u, free, weight_path='weights', scaler_path='scalers' \
+    my_problem = Problem(nelx, nely, nelz, rmin, target_volf, x, f, u, free, weight_path='all_weights/weights', scaler_path='all_scalers/scalers' \
 
                          , comment=commentary, constrainedDofs=dispconstrdofs, disp_constr_value=dispconstrval,
                          xmask=xmask, fixedr=fmask)
