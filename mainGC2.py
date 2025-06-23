@@ -25,69 +25,23 @@ def update_constr(u,U,**kwarg):
         Ui= u - min(beta*u,abs(alpha*U-u))
     return Ui
 
-folder='optimization_results/opt_res_2025-06-09_21-07-52'
+
 def main(nelx,nely,nelz,volfrac,rmin,rstart,maxloop,commentary,mmmove,target_volf,is_gc):
 
     ndof = 3 * (nelx + 1) * (nely + 1) * (nelz + 1)
     """setting initial design and optimization domain"""
     specific_domain=False
-    #x=np.random.beta(8,2,size=3*nely * nelx * nelz)*0.49
-    x = np.ones(3*nely * nelx * nelz, dtype=float)*rstart
-    #x = np.load('optimization_results/opt_res_2025-06-07_14-29-26/radii_100.npy').flatten()
-
-
+    x=np.zeros(3*nelx*nely*nelz)
     if specific_domain:
-        xmask = np.zeros(nelx*nely*nelz,dtype=bool)
-        for xx in range(nelx):
-            for yy in range(nely):
-                for zz in range(nelz):
-                    center = (xx + 0.5, yy + 0.5,zz+0.5)
-                    idx = xx + nelx * yy + nelx * nely * zz
-                    xmask[idx] = profile_cyllinder(center,nelx,nely)
+        xmask = np.load('examples/cyllinder/cyllinder_xmask.npy')
     else: xmask = None
-    # x[np.kron(xmask,np.ones(3)).flatten().astype(bool)]=x1
-
-
-
 
     # BC's and support
-    [jf, kf] = np.meshgrid(np.arange(nelx + 1), np.arange(nely + 1))  # Coordinates
-    fixednid1 = (kf) * (nelx + 1) + jf
-    fixed1 = 3*fixednid1.flatten()+2
-
-    fixednid2 = (kf) * (nelx + 1) + jf
-    fixed2 = np.kron(3 * fixednid2.flatten(), np.ones(3)).astype(np.int32)
-    fixed2[1::3] += 1
-    fixed2[2::3] += 2
-
-    # fixed = np.concatenate([fixed1,fixed2])
-    fixed = fixed2
-
-    dofs = np.arange(3 * (nelx + 1) * (nely + 1) * (nelz + 1))
-    free = np.setdiff1d(dofs, fixed)
-
-    # Solution and RHS vectors
-    f = np.zeros((ndof, 1))
+    f = np.load('examples/cyllinder/bending_load.npy')
+    free = np.load(f'examples/cyllinder/free.npy')
     u = np.zeros((ndof, 1))
 
-    # Load
 
-    loadnid2 = (kf) * (nelx + 1) + jf +(nelx+1)*(nely+1)*nelz  # Node IDs
-    loaddof21 = 3 * loadnid2.flatten().astype(np.int32) + 1  # DOFs
-    loaddof22 = 3 * loadnid2.flatten().astype(np.int32)[[0,-1]] + 0  # DOFs
-    f[loaddof21, 0] = 1
-    # f[loaddof22, 0] = 0.5
-    # fc=f_c(nelx,nely).flatten()
-    # f[loaddof21, 0] = fc[::3]
-    # f[loaddof22, 0] = fc[1::3]
-
-    # outer_nodes_arr = outer_nodes(nelx, nely, nelz, xmask)
-    # f = apply_presure_load_on_cyllinder(outer_nodes_arr, nelx, nely, nelz).reshape(len(f),1)
-
-    plot_disp(f, fixed, nelx, nely, nelz)
-
-    f = np.load(f'{folder}/force.npy')
-    free = np.load(f'{folder}/bc_free.npy')
     """setting mask for loaded units"""
     fmask=np.zeros(3*nelx*nely*nelz,dtype=bool)
     for xx in range(nelx):
@@ -104,22 +58,9 @@ def main(nelx,nely,nelz,volfrac,rmin,rstart,maxloop,commentary,mmmove,target_vol
         fmask = fmask[np.kron(xmask, np.ones(3)).flatten().astype(bool)]
 
     """displacement constraints"""
-    disp_constr = (kf[nely // 2, :]) * (nelx + 1) + jf[nely // 2, :] + (nelx + 1) * (nely + 1) * nelz
-    # dispconstrdofs = 3 * np.concatenate([disp_constr[:1], disp_constr[-1:]]) + 1
-    # dispconstrdofs = 3*disp_constr[nelx//2-1:nelx//2+2]+1
-    # dispconstrdofs =  np.array([3*((kf[nely//2, 0]) * (nelx + 1) + jf[nely//2,0])])
     dispconstrdofs = np.array([],dtype=np.int32)
-    dispconstrval = 0.4 * np.ones(len(dispconstrdofs))
-    
+    dispconstrval = 0.0 * np.ones(len(dispconstrdofs))
 
-
-
-
-   
-    
-
-
-    
     """setting up problem"""
     my_problem = Problem(nelx, nely, nelz, rmin, target_volf, x, f, u, free, weight_path='weights', scaler_path='scalers' \
 
@@ -129,7 +70,7 @@ def main(nelx,nely,nelz,volfrac,rmin,rstart,maxloop,commentary,mmmove,target_vol
     #regularization coefficient for disp constr sensitivity
     my_problem.regc=0.9
     #penalization coefficient
-    my_problem.pp=1
+    my_problem.pp=2
     my_problem.volfrac=target_volf
 
     rod_mesh_path=os.path.join(my_problem.log_dir,'rod_mesh.vtu')
@@ -328,7 +269,7 @@ def main(nelx,nely,nelz,volfrac,rmin,rstart,maxloop,commentary,mmmove,target_vol
 if __name__ == '__main__':
     nelx=10
     nely=10
-    nelz=20
+    nelz=50
     commentary='box, irregularity tests'
     for target_volf in [0.2]:
         main(nelx,nely,nelz,0.1,1.4,0.2,100,commentary,0.2,target_volf,True)
