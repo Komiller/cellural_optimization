@@ -30,7 +30,7 @@ def main(nelx,nely,nelz,volfrac,rmin,rstart,maxloop,commentary,mmmove,target_vol
 
     ndof = 3 * (nelx + 1) * (nely + 1) * (nelz + 1)
     """setting initial design and optimization domain"""
-    specific_domain=False
+    specific_domain=True
     x=np.ones(3*nelx*nely*nelz)*rstart
     if specific_domain:
         xmask = np.load('examples/cyllinder/cyllinder_xmask.npy')
