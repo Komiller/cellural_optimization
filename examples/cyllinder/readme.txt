@@ -1,0 +1,1 @@
+nelx,nely,nelz=10,10,50
