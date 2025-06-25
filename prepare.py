@@ -6,7 +6,7 @@ from itertools import permutations
 
 from scipy.spatial import KDTree
 def load_CHs():
-    folder_path='PA_box'
+    folder_path='PA_massive'
     matrices = {}
     count=0
     for file_name in os.listdir(folder_path):
@@ -23,7 +23,7 @@ def load_CHs():
     return matrices
 #def add_rotation
 def load_dens():
-    folder_path='PA_PCgrid_dens'
+    folder_path='PA_densities'
     matrices = {}
     count=0
     for file_name in os.listdir(folder_path):

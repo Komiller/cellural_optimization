@@ -28,13 +28,13 @@ for i in range(1,7):
         y_train = scaler.fit_transform(y_train.reshape(-1, 1)).flatten()
 
 
-        with open(f'scalers_PAPC/scaler{numb}.pkl', 'wb') as f:
-            pickle.dump(scaler, f)
+        # with open(f'scalers_PAPC/scaler{numb}.pkl', 'wb') as f:
+        #     pickle.dump(scaler, f)
 
 
 
-        # with open(f'PAPC_js/Ch{numb}.json', 'w') as f:
-        #     json.dump({'inputs':x_train.tolist(),'outputs': y_train.tolist()}, f)
+        with open(f'PA_js/Ch{numb}.json', 'w') as f:
+            json.dump({'inputs':x_train.tolist(),'outputs': y_train.tolist()}, f)
 
 # from itertools import permutations
 # tmp=load_dens()
