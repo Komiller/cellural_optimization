@@ -16,32 +16,36 @@ isotropic=np.array([[269.2308,115.3846,115.3846,0,0,0],
 lowest_c=np.ones(9)*1e-3
 class model:
     numers=[11,12,13,22,23,33,44,55,66,99]
-    def __init__(self,weights_path,scaler_path='scalers'):
+    def __init__(self,weights_path,scaler_path='scalers',keras=False):
         self.models=[]
         self.scalers=[]
         self.scalars_diffs=[]
         count=0
         for num in self.numers:
             if num!=99:
-                data = scipy.io.loadmat(f'{weights_path}/fitnet_weights_{num}.mat')
+                if keras: model=keras.models.load_model(f'{weights_path}/model_{num}.keras')
+                else:data = scipy.io.loadmat(f'{weights_path}/fitnet_weights_{num}.mat')
+
                 with open(f'{scaler_path}/scaler{num}.pkl', 'rb') as f:
                     self.scalers.append(pickle.load(f))
                     self.scalars_diffs.append(self.scalers[count].data_max_ - self.scalers[count].data_min_)
                     count+=1
             else:
-                data = scipy.io.loadmat(f'{weights_path}/density.mat')
+                if keras: model=keras.models.load_model(f'{weights_path}/density.keras')
+                else:data = scipy.io.loadmat(f'{weights_path}/density.mat')
 
-            IW = data['IW']
-            LW = data['LW']
-            b1 = data['b1']
-            b2 = data['b2']
+            if not keras:
+                IW = data['IW']
+                LW = data['LW']
+                b1 = data['b1']
+                b2 = data['b2']
 
-            model = Sequential()
-            neuron_number=len(LW.T)
-            model.add(Dense(neuron_number, input_dim=3, activation='tanh'))
-            model.add(Dense(1, activation='linear'))
-            model.layers[0].set_weights([np.array(IW.T), np.array(b1.flatten())])
-            model.layers[1].set_weights([np.array(LW.T), np.array(b2.flatten())])
+                model = Sequential()
+                neuron_number=len(LW.T)
+                model.add(Dense(neuron_number, input_dim=3, activation='tanh'))
+                model.add(Dense(1, activation='linear'))
+                model.layers[0].set_weights([np.array(IW.T), np.array(b1.flatten())])
+                model.layers[1].set_weights([np.array(LW.T), np.array(b2.flatten())])
             self.models.append(model)
 
 

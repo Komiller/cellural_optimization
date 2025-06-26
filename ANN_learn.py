@@ -60,7 +60,7 @@ def train_Cnum(json_file,result_file):
         loss=keras.losses.MeanSquaredError(), metrics=[RootMeanSquaredError()],
     )
 
-    model.fit(train_dataset, validation_data=val_dataset, epochs=2)
+    model.fit(train_dataset, validation_data=val_dataset, epochs=300)
 
 
 
@@ -87,5 +87,5 @@ def train_Cnum(json_file,result_file):
 
     model.save(result_file)
 
-train_Cnum('new_js/Ch11.json','all_weights/weights_test/model_11.keras')
+train_Cnum('new_js/Ch11.json','all_weights/test_weight/model_11.keras')
 
